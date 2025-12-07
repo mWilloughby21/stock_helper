@@ -11,10 +11,8 @@ from config import EXCEL_FILE_PATH, DATE_COL, DATE_CHECK_COL, DATE_CHECK_ROW_STA
 
 def main():
     # Load workbook and select sheet
-    wb_values = openpyxl.load_workbook(EXCEL_FILE_PATH, data_only=True, read_only=True)
-    wb_formulas = openpyxl.load_workbook(EXCEL_FILE_PATH)
-    sheet = wb_values["Investment Analysis"]
-    update_sheet = wb_formulas["Investment Analysis"]
+    wb = openpyxl.load_workbook(EXCEL_FILE_PATH)
+    sheet = wb["Investment Analysis"]
     
     # Set column indices
     start_idx = column_index_from_string(START_COL)
@@ -27,10 +25,10 @@ def main():
     for date in dates.keys():
         closing_prices = fetch_closing_prices(tickers, date)
         date_row = dates[date]
-        update_close_prices(update_sheet, closing_prices, date_row)
+        update_close_prices(sheet, closing_prices, date_row)
     
     # Save workbook with updated prices
-    wb_formulas.save(EXCEL_FILE_PATH)
+    wb.save(EXCEL_FILE_PATH)
     print("Stock closing prices updated successfully.")
 
 

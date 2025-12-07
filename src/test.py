@@ -4,14 +4,14 @@ import yfinance as yf
 import datetime as dt
 
 # Config constants
-from config import EXCEL_FILE_PATH, DEFAULT_START_ROW
+from config import TEST_EXCEL_FILE_PATH, DEFAULT_START_ROW
 
 # This test script adds a new stock to the investment analysis Excel sheet
 def test_new_stock(ticker: str, col_letter: str):
     print(f"Adding new stock {ticker} in column {col_letter}...")
     
     # Load workbook and select sheet
-    wb = openpyxl.load_workbook(EXCEL_FILE_PATH)
+    wb = openpyxl.load_workbook(TEST_EXCEL_FILE_PATH)
     sheet = wb["Investment Analysis"]
     
     # Fetch historical data from yfinance
@@ -33,7 +33,7 @@ def test_new_stock(ticker: str, col_letter: str):
         row += 1
     
     # Save workbook
-    wb.save(EXCEL_FILE_PATH)
+    wb.save(TEST_EXCEL_FILE_PATH)
     print(f"New stock {ticker} added successfully in column {col_letter}.")
 
 

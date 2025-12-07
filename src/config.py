@@ -5,8 +5,10 @@ import os
 # Base directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Excel file path
+# Excel file paths
 EXCEL_FILE_PATH = os.path.join(BASE_DIR, "..", "data", "original.xlsx")
+TEST_EXCEL_FILE_PATH = os.path.join(BASE_DIR, "..", "data", "test.xlsx")
+
 
 # Date Columnn Settings
 DATE_COL = "A"
