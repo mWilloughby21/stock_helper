@@ -1,6 +1,5 @@
 import os
 
-# Config constants
 
 # Base directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +21,6 @@ TICKER_ROW = 8
 # Start and End Columns for Tickers
 START_COL = "AC"
 END_COL = "TU"
-
 
 # Default row to start writing closing prices
 DEFAULT_START_ROW = 11

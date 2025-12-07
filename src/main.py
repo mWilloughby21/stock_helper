@@ -1,7 +1,8 @@
 import openpyxl
 from openpyxl.utils import column_index_from_string
-from helper import read_portfolio_tickers, read_portfolio_dates, fetch_closing_prices, update_close_prices
+from helper import read_portfolio_tickers, read_portfolio_dates, fetch_closing_prices, update_close_prices, time_update
 import os
+import time
 import yfinance as yf
 import datetime as dt
 
@@ -10,6 +11,9 @@ from config import EXCEL_FILE_PATH, DATE_COL, DATE_CHECK_COL, DATE_CHECK_ROW_STA
 
 
 def main():
+    # Time variables
+    start_time = time.time()
+    
     # Load workbook and select sheet
     wb = openpyxl.load_workbook(EXCEL_FILE_PATH)
     sheet = wb["Investment Analysis"]
@@ -26,10 +30,12 @@ def main():
         closing_prices = fetch_closing_prices(tickers, date)
         date_row = dates[date]
         update_close_prices(sheet, closing_prices, date_row)
+        time_update(start_time)
     
     # Save workbook with updated prices
     wb.save(EXCEL_FILE_PATH)
     print("Stock closing prices updated successfully.")
+    time_update(start_time)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import yfinance as yf
 import datetime as dt
+import time
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -105,3 +106,8 @@ def update_close_prices(sheet: Worksheet, closing_prices: dict[str, float], date
     for col, price in closing_prices.items():
         sheet[f"{col}{date_row}"].value = price
         print(f"Price {price} written to {col}{date_row}")
+        
+def time_update(seconds: int) -> None:
+    end_time = time.time()
+    seconds = int(end_time - seconds)
+    print(f"Total time elapsed: {seconds} seconds.")
