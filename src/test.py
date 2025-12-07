@@ -4,15 +4,7 @@ import yfinance as yf
 import datetime as dt
 
 # Config constants
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-EXCEL_FILE_PATH = os.path.join(BASE_DIR, "..", "data", "test.xlsx")
-DATE_COL = "A"
-DATE_CHECK_COL = "C"
-DATE_CHECK_ROW_START = 11
-DATE_CHECK_ROW_END = 260
-TICKER_ROW = 8
-START_COL = "AC"
-END_COL = "TU"
+from config import EXCEL_FILE_PATH, DEFAULT_START_ROW
 
 # This test script adds a new stock to the investment analysis Excel sheet
 def test_new_stock(ticker: str, col_letter: str):
@@ -34,7 +26,7 @@ def test_new_stock(ticker: str, col_letter: str):
     closing_prices = df[ticker]['Close'].round(2).tolist()
     
     # Update sheet with new closing prices
-    row = 11
+    row = DEFAULT_START_ROW
     for price in closing_prices:
         sheet[f"{col_letter}{row}"].value = float(price)
         print(f"Updated {col_letter}{row} with closing price {price}.")

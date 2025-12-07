@@ -5,17 +5,9 @@ import os
 import yfinance as yf
 import datetime as dt
 
-
 # Config constants
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-EXCEL_FILE_PATH = os.path.join(BASE_DIR, "..", "data", "original.xlsx")
-DATE_COL = "A"
-DATE_CHECK_COL = "C"
-DATE_CHECK_ROW_START = 11
-DATE_CHECK_ROW_END = 260
-TICKER_ROW = 8
-START_COL = "AC"
-END_COL = "TU"
+from config import EXCEL_FILE_PATH, DATE_COL, DATE_CHECK_COL, DATE_CHECK_ROW_START, DATE_CHECK_ROW_END, TICKER_ROW, START_COL, END_COL
+
 
 def main():
     # Load workbook and select sheet
