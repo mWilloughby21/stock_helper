@@ -23,31 +23,26 @@ def test_new_stock(ticker: str, col_letter: str):
     sheet = wb["Investment Analysis"]
     
     # Fetch historical data from yfinance
-    df = yf.download(ticker, start="2025-01-01", end=dt.datetime.now().strftime("%Y-%m-%d"), interval="1d", progress=False, auto_adjust=True)
+    df = yf.download(ticker, start="2025-01-01", end=dt.datetime.now().strftime("%Y-%m-%d"), interval="1d", progress=False, auto_adjust=True, group_by='ticker')
     if df.empty:
         print(f"No data found for ticker {ticker} between 2025-01-01 and {dt.datetime.now().strftime('%Y-%m-%d')}.")
         return
     else:
         print(f"Data fetched for {ticker}: {len(df)} records.")
-        
+    
     # Extract closing prices
-    closing_prices = []
-    for close_date in df.index:
-        price = round(float(df.loc[close_date]['Close']), 2)
-        closing_prices.append(price)
-        
+    closing_prices = df[ticker]['Close'].round(2).tolist()
+    
     # Update sheet with new closing prices
     row = 11
     for price in closing_prices:
-        sheet[f"{col_letter}{row}"].value = price
+        sheet[f"{col_letter}{row}"].value = float(price)
+        print(f"Updated {col_letter}{row} with closing price {price}.")
         row += 1
     
     # Save workbook
     wb.save(EXCEL_FILE_PATH)
     print(f"New stock {ticker} added successfully in column {col_letter}.")
 
-def test_main():
-    pass  # Placeholder for main function test
 
 test_new_stock("CRWD", "UB")
-test_main()
