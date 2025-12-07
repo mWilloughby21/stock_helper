@@ -1,88 +1,107 @@
 import yfinance as yf
-import openpyxl
 import datetime as dt
-from openpyxl.utils.datetime import from_excel
+from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet
 
-# Function to fetch stock closing prices
-def fetch_close_price(ticker: str, excel_date) -> float:
-    
-    # Excel date error checks
-    if excel_date is None:
-        raise ValueError("Date is empty in Excel sheet.")
-    
-    # Ensure excel_date is datetime
-    if isinstance(excel_date, dt.datetime):
-        date = excel_date
-        
-    elif isinstance(excel_date, (int, float)):
-        date = from_excel(excel_date)
-        
-    elif isinstance(excel_date, str):
-        possible_formats = [
-            "%Y-%m-%d",  # ISO format
-            "%m/%d/%Y",  # US format
-            "%d/%m/%Y"   # European format
-        ]
-        
-        for fmt in possible_formats:
-            try:
-                date = dt.datetime.strptime(excel_date, fmt)
-                break
-            except ValueError:
-                continue
-            
-        else:
-            raise ValueError(f"Date format for {excel_date} is not recognized.")
-        
-    else:
-        raise TypeError(f"Unsupported type for excel_date: {type(excel_date)}")
-    
+#  Function to fetch stock closing prices for multiple tickers on a specific date / dict[col_letter: close]
+def fetch_closing_prices(tickers: dict[str, str], date: dt.datetime) -> dict[str, float]:
+    closing_prices = {}
+    stock_list = []
     start = date.strftime("%Y-%m-%d")
     end = (date + dt.timedelta(days=1)).strftime("%Y-%m-%d")
     
-    close = yf.download(ticker, start=start, end=end, interval='1d', progress=False)
+    # Make list of tickers
+    for ticker in tickers.keys():
+        stock_list.append(ticker)
+        
+    # Fetch data in bulk
+    df = yf.download(stock_list, start=start, end=end, interval="1d", progress=False, auto_adjust=True)
     
-    if not close.empty:
-        return float(close['Close'][0])
-    else:
-        raise ValueError(f"No data found for {ticker} on {date}")
+    if df.empty:
+        raise ValueError(f"No data found for the provided tickers on {date.strftime('%Y-%m-%d')}")
     
+    for ticker in stock_list:
+        closing_prices[tickers[ticker]] = round(float(df['Close'][ticker].iloc[0]), 2)
+        
+    return closing_prices
+
 # Function to validate ticker symbols
 def is_valid_ticker(ticker: str) -> bool:
-    if not isinstance(ticker, str):
+    if not isinstance(ticker, str) or ticker == "Index":
         return False
     
     ticker = ticker.strip().upper()
-    
-    if ticker == "":
-        return False
+    return ticker.isalnum() and 1 <= len(ticker) <= 5
 
-    try:
-        info = yf.Ticker(ticker).fast_info
-        return (
-            info is not None and
-            isinstance(info, dict) and
-            info.get("last_price") is not None
-        )
-    except:
-        return False
+# Function to check if a date is today or in the future
+def is_today(date) -> bool:
+    today = dt.date.today()
+    if isinstance(date, dt.datetime):
+        return date.date() == today
+    elif isinstance(date, dt.date):
+        return date == today
+    else:
+        date = dt.datetime.strptime(date, "%m/%d/%y").date()
+        today = dt.datetime.now().date()
+        return date == today
+    
+# Function to check if a date is in the future
+def is_future(date) -> bool:
+    today = dt.date.today()
+    if isinstance(date, dt.datetime):
+        return date.date() > today
+    elif isinstance(date, dt.date):
+        return date > today
+    else:
+        date = dt.datetime.strptime(date, "%m/%d/%y").date()
+        today = dt.datetime.now().date()
+        return date > today
 
-# Function to read portfolio tickers from Investment Analysis sheet
-def read_portfolio_tickers(file_path: str, start_col: str, end_col: str) -> list:
-    wb = openpyxl.load_workbook(file_path)
-    sheet = wb["Investment Analysis"]
+# Function to read portfolio tickers from Investment Analysis sheet / dict[ticker: col_letter]
+def read_portfolio_tickers(sheet: Worksheet, ticker_row: int, start_idx: int, end_idx: int) -> dict[str, str]:
     
-    start_idx = openpyxl.utils.column_index_from_string(start_col)
-    end_idx = openpyxl.utils.column_index_from_string(end_col) + 1
-    
-    tickers = [] # Create dictionary to store tickers with column values
+    tickers = {} 
     for col in range(start_idx, end_idx):
-        col_letter = openpyxl.utils.get_column_letter(col)
-        cell_value = sheet[f"{col_letter}8"].value
-        if cell_value and is_valid_ticker(cell_value):
-            tickers.append(cell_value.strip().upper())
+        col_letter = get_column_letter(col)
+        cell_value = sheet[f"{col_letter}{ticker_row}"].value
+        if is_valid_ticker(cell_value):
+            ticker = cell_value.strip().upper()
+            tickers[ticker] = col_letter
             
     return tickers
 
-def read_portfolio_date(file_path: str, date_col: str) -> dt.datetime:
-    pass
+# Function to read portfolio dates from Investment Analysis sheet / dict[date: row]
+def read_portfolio_dates(sheet: Worksheet, date_col: str, check_col: str, date_row_start: int, date_row_end: int) -> dict[dt.datetime, int]:
+    dates = {}
+    
+    for row in range(date_row_start, date_row_end + 1):
+        check_value = sheet[f"{check_col}{row}"].value
+        
+        if check_value is not None:
+            continue
+        
+        date_value = sheet[f"{date_col}{row}"].value
+        if isinstance(date_value, dt.datetime):
+            date_dt = date_value
+        elif isinstance(date_value, dt.date):
+            date_dt = dt.datetime(date_value.year, date_value.month, date_value.day)
+        else:
+            date_dt = dt.datetime.strptime(date_value, "%m/%d/%y")
+                
+        dates[date_dt] = row
+        last_date = date_dt
+        
+        if is_today(last_date):
+            break
+        
+        if is_future(last_date):
+            dates.pop(date_dt)
+            break
+        
+    return dates
+
+# Update close prices in the sheet for given tickers and date
+def update_close_prices(sheet: Worksheet, closing_prices: dict[str, float], date_row: int) -> None:
+    for col, price in closing_prices.items():
+        sheet[f"{col}{date_row}"].value = price
+        print(f"Price {price} written to {col}{date_row}")
