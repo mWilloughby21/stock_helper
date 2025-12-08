@@ -107,7 +107,6 @@ def update_close_prices(sheet: Worksheet, closing_prices: dict[str, float], date
         sheet[f"{col}{date_row}"].value = price
         print(f"Price {price} written to {col}{date_row}")
         
-def time_update(seconds: int) -> None:
+def time_update(start_time: int) -> None:
     end_time = time.time()
-    seconds = int(end_time - seconds)
-    print(f"Total time elapsed: {seconds} seconds.")
+    print(f"Total time elapsed: {end_time - start_time:.2f} seconds.")
