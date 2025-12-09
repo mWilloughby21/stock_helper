@@ -1,5 +1,4 @@
 import openpyxl
-import os
 import yfinance as yf
 import datetime as dt
 
