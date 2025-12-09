@@ -22,5 +22,13 @@ TICKER_ROW = 8
 START_COL = "AC"
 END_COL = "TU"
 
+# Market Indices Dictionary
+MARKET_DICT = {
+    "^DJI": "C",
+    "^GSPC": "G",
+    "^IXIC": "K",
+    "^RUT": "O"
+}
+
 # Default row to start writing closing prices
 DEFAULT_START_ROW = 11
