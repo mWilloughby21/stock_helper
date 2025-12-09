@@ -6,7 +6,7 @@ import time
 from helper import read_portfolio_tickers, read_portfolio_dates, fetch_closing_prices, update_close_prices, time_update
 
 # Config constants
-from config import EXCEL_FILE_PATH, DATE_COL, DATE_CHECK_COL, DATE_CHECK_ROW_START, DATE_CHECK_ROW_END, TICKER_ROW, START_COL, END_COL
+from config import EXCEL_FILE_PATH, DATE_COL, DATE_CHECK_COL, DATE_CHECK_ROW_START, DATE_CHECK_ROW_END, TICKER_ROW, START_COL, END_COL, MARKET_DICT
 
 
 def main():
@@ -27,6 +27,8 @@ def main():
     for date in dates.keys():
         date_row = dates[date]
         closing_prices = fetch_closing_prices(tickers, date)
+        update_close_prices(sheet, closing_prices, date_row)
+        closing_prices = fetch_closing_prices(MARKET_DICT, date)
         update_close_prices(sheet, closing_prices, date_row)
         time_update(start_time)
     
