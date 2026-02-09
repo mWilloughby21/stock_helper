@@ -1,0 +1,33 @@
+# Virtual Environments
+venv/
+.env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Test / coverage artifacts
+.coverage
+htmlcov/
+
+# Excel output files
+data/output/
+*.xlsx
+
+# Cached data
+data/cache/
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE settings
+.vscode/
+.idea/
+
+# Environment-specific config
+*.env

@@ -1,0 +1,5 @@
+openpyxl
+pandas
+yfinance
+python-dotenv
+pytest
