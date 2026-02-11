@@ -14,7 +14,7 @@ class Portfolio:
     
     @property
     def total_invested(self) -> float:
-        return sum(stock.total_cost() for stock in self.stocks)
+        return sum(stock.total_cost for stock in self.stocks)
     
     def get_stock_by_ticker(self, ticker: str) -> Stock | None:
         for stock in self.stocks:
