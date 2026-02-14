@@ -1,49 +1,45 @@
 # format_excel.py
 
-from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
-from openpyxl.formatting.rule import CellIsRule
-from openpyxl.utils import get_column_letter
+import pandas_market_calendars as mcal
+from openpyxl.styles import Alignment
+from datetime import datetime
 
-class PortfolioFormatter:
+
+class SetupFormatter:
     def __init__(self, worksheet):
         self.ws = worksheet
     
-    # Public Methods
+    def center(self):
+        for row in self.ws.iter_rows(min_row=1, max_row=260, min_col=1, max_col=2):
+            for cell in row:
+                cell.alignment = Alignment(horizontal="center", vertical="center")
     
-    # Formatting that does NOT depend on data
+    def get_dates(self, year=None):
+        year = year or datetime.now().year
+        nyse = mcal.get_calendar('NYSE')
+        schedule = nyse.schedule(start_date=f'{year}-01-01', end_date=f'{year}-12-31')
+        
+        return list(zip(schedule.index.date, schedule.index.day_name()))
+    
+    def get_year(self):
+        self.ws["B3"] = datetime.now().year
+    
+    def specific_cells(self):
+        self.ws.cell(row=2, column=2, value="Year")
+        self.ws.cell(row=2, column=1, value="First Trade Date")
+        self.ws.cell(row=3, column=1, value=self.get_dates()[0][0])
+        self.ws.cell(row=5, column=1, value="Date")
+        self.ws.cell(row=5, column=2, value="Day")
+    
+    # Formatting 
     def static_format(self):
-        self._headers()
         self._set_column_widths()
         self._freeze_panes()
-        self._add_filters()
-    
-    # Formatting that does depend on data
-    def dynamic_format(self, start_row: int, end_row: int):
-        self._currency_columns(start_row, end_row)
-        self._percent_columns(start_row, end_row)
-        self._gain_loss_conditional_formatting(start_row, end_row)
-    
-    # Private Helpers
-    
-    def _headers(self):
-        header_fill = PatternFill(start_color="1F4E78", end_color="1F4E78", fill_type="solid")
-        header_font = Font(color="FFFFFF", bold=True)
-        
-        for cell in self.ws[1]:
-            cell.fill = header_fill
-            cell.font = header_font
-            cell.alignment = Alignment(horizontal="center")
     
     def _set_column_widths(self):
         widths = {
-            "A": 12,  # Ticker
-            "B": 12,  # Shares
-            "C": 14,  # Avg Cost
-            "D": 14,  # Total Cost
-            "E": 14,  # Current Price
-            "F": 14,  # Total Value
-            "G": 14,  # Gain/Loss
-            "H": 12,  # % Change
+            "A": 14,  # Market Dates
+            "B": 8,  # Day of Week
         }
         
         for col, width in widths.items():
@@ -51,37 +47,3 @@ class PortfolioFormatter:
     
     def _freeze_panes(self):
         self.ws.freeze_panes = "C1"
-    
-    def _add_filters(self):
-        self.ws.auto_filter.ref = f"A1:H{self.ws.max_row}"
-    
-    def _currency_columns(self, start_row, end_row):
-        currency_cols = ["C", "D", "E", "F", "G"]
-        
-        for col in currency_cols:
-            for row in range(start_row, end_row +1):
-                self.ws[f"{col}{row}"].number_format = "$#,##0.00"
-    
-    def _percent_columns(self, start_row, end_row):
-        percent_cols = ["H"]
-        
-        for col in percent_cols: 
-            for row in range(start_row, end_row + 1):
-                self.ws[f"{col}{row}"].number_format = "0.00%"
-    
-    def _gain_loss_conditional_formatting(self, start_row, end_row):
-        gain_loss_col = "G"
-        gain_range = f"{gain_loss_col}{start_row}:{gain_loss_col}{end_row}"
-
-        green_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
-        red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
-
-        self.ws.conditional_formatting.add(
-            gain_range,
-            CellIsRule(operator="greaterThan", formula=["0"], fill=green_fill)
-        )
-
-        self.ws.conditional_formatting.add(
-            gain_range,
-            CellIsRule(operator="lessThan", formula=["0"], fill=red_fill)
-        )
