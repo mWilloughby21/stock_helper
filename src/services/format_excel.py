@@ -1,7 +1,7 @@
 # format_excel.py
 
 import pandas_market_calendars as mcal
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Font
 from datetime import datetime
 
 
@@ -22,21 +22,21 @@ class SetupFormatter:
         return list(zip(schedule.index.date, schedule.index.day_name()))
     
     def get_year(self):
-        self.ws["B3"] = datetime.now().year
+        self.ws["B4"] = datetime.now().year
     
     def specific_cells(self):
-        self.ws.cell(row=2, column=2, value="Year")
-        self.ws.cell(row=2, column=1, value="First Trade Date")
-        self.ws.cell(row=3, column=1, value=self.get_dates()[0][0])
-        self.ws.cell(row=5, column=1, value="Date")
-        self.ws.cell(row=5, column=2, value="Day")
+        self.ws.cell(row=3, column=2, value="Year").font = Font(bold=True)
+        self.ws.cell(row=3, column=1, value="First Trade Date").font = Font(bold=True)
+        self.ws.cell(row=4, column=1, value=self.get_dates()[0][0])
+        self.ws.cell(row=7, column=1, value="Date").font = Font(bold=True)
+        self.ws.cell(row=7, column=2, value="Day").font = Font(bold=True)
     
     # Formatting 
     def static_format(self):
-        self._set_column_widths()
+        self._set_col_widths()
         self._freeze_panes()
     
-    def _set_column_widths(self):
+    def _set_col_widths(self):
         widths = {
             "A": 14,  # Market Dates
             "B": 8,  # Day of Week

@@ -9,6 +9,7 @@ class Stock:
         self.ticker: str = ticker
         self.lots: List[StockLot] = lots
         self._current_price: float | None = None
+        self.cols: List = None
     
     def __repr__(self):
         return f"Stock(ticker={self.ticker}, lots={self.lots})"
