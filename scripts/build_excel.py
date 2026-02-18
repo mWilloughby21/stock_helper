@@ -39,6 +39,7 @@ def main():
     csv_source = CSVSource(CSV_PATH)
     lots = csv_source.load_lots()
     portfolio.add_lots(lots)
+    portfolio.calc_port_pct()
     for stock in portfolio.stocks:
         cols = writer.get_block()
         writer.format_info(cols)

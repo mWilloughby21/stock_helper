@@ -2,7 +2,8 @@
 
 START_COL = "C"
 
-from openpyxl.styles import Font, Border, Side, Alignment
+import yfinance as yf
+from openpyxl.styles import Border, Side, Alignment
 from openpyxl.utils import column_index_from_string, get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -14,7 +15,15 @@ class SheetWriter:
         pass
     
     def write_info(self, cols, stock):
-        pass
+        ticker = yf.Ticker(stock.ticker)
+        
+        self.ws.cell(row=1, column=cols[1]).value = round(stock.total_cost, 2)
+        self.ws.cell(row=1, column=cols[4]).value = round(stock.average_cost, 2)
+        self.ws.cell(row=3, column=cols[1]).value = round(stock.total_shares, 3)
+        self.ws.cell(row=3, column=cols[4]).value = round(stock.port_pct, 2)
+        self.ws.cell(row=5, column=cols[2]).value = ticker.info.get('industry', 'N/A')
+        self.ws.cell(row=6, column=cols[2]).value = ticker.info.get('longName')
+        self.ws.cell(row=7, column=cols[0]).value = stock.ticker
     
     def get_block(self):
         col = column_index_from_string(START_COL)

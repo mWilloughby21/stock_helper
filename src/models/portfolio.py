@@ -22,6 +22,11 @@ class Portfolio:
                 return stock
         return None
     
+    def calc_port_pct(self):
+        total_value = sum(stock.total_cost for stock in self.stocks)
+        for stock in self.stocks:
+            stock.port_pct = (stock.total_cost / total_value * 100)
+    
     # Group the lots by ticker and create / update Stock objects in the portfolio
     def add_lots(self, lots: List[StockLot]):
         grouped_lots = defaultdict(list)
